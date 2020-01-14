@@ -1,0 +1,17 @@
+mq:
+  producer:
+    nameServer: localhost:9876
+    producerGroup: myProducerGroup
+    txProducerGroup: myTxGroup
+    emailProducerGroup: myEmailProducerGroup
+    topic: myTopic
+    tag: tag1
+    emilTopic: emilTopic
+    emailTag: tag1
+    #ÊÂÎñ
+    tx:
+      topic: txTopic
+      tag: tagA
+
+server:
+  port: 8082

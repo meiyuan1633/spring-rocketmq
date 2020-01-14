@@ -1,0 +1,9 @@
+mq:
+  producer:
+    nameServer: localhost:9876
+    producerGroup: myGroup
+    topic: myTopic
+    tag: tag1
+
+server:
+  port: 8081

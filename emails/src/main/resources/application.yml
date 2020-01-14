@@ -1,0 +1,17 @@
+spring:
+  mail:
+    host: smtp.163.com
+    password: 1633670876meimei
+    username: 13807804693@163.com
+    default-encoding: UTF-8
+
+  thymeleaf:
+    enabled: true
+    cache: false
+    encoding: UTF-8
+    mode: html
+    prefix: classpath:/templates/
+    suffix: .html
+
+server:
+  port: 8083

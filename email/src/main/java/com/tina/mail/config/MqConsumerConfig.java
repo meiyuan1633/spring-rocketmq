@@ -1,0 +1,62 @@
+package com.tina.mail.config;
+
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
+import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
+import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
+import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
+import org.apache.rocketmq.common.message.MessageExt;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+
+import java.nio.charset.Charset;
+import java.util.List;
+
+@Configuration
+@PropertySource("classpath:mq.properties")
+public class MqConsumerConfig {
+
+    @Value("localhost:9876")
+    private String nameServer;
+
+    @Value("myConsumerGroup")
+    private String consumerGroup;
+
+    @Value("myTopic")
+    private String topic;
+
+    /*消息的重复消费问题*/
+    @Bean
+    public DefaultMQPushConsumer defaultMQPushConsumer() throws MQClientException {
+        DefaultMQPushConsumer defaultMQPushConsumer = new DefaultMQPushConsumer();
+        defaultMQPushConsumer.setNamesrvAddr(this.nameServer);
+        defaultMQPushConsumer.setConsumerGroup(this.consumerGroup);
+
+        /*设置消费从哪个位置开始消费，从上一次消费结束的地方开始*/
+        defaultMQPushConsumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET);
+        /**/
+        defaultMQPushConsumer.subscribe(this.topic,"tag1");
+        /*注册消息的监听器*/
+        defaultMQPushConsumer.registerMessageListener(new MessageListenerConcurrently() {
+            @Override
+            public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
+                System.out.println(Thread.currentThread().getName());
+                msgs.forEach(me -> {
+                    java.lang.String message = new java.lang.String(me.getBody(), Charset.defaultCharset());
+                    System.out.println(message);
+                });
+                /**
+                 * ConsumeConcurrentlyStatus.CONSUME_SUCCESS 跟mq确认消息已经消费了，然后MQ将消息标记为已消费消息，从队列中移除。
+                 *
+                 */
+                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+            }
+        });
+        defaultMQPushConsumer.start();
+        return defaultMQPushConsumer;
+
+    }
+}
